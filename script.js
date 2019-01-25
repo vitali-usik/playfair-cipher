@@ -2,6 +2,8 @@
 
 const ALPHABET = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 const LETTER = 'X';
+const MAX_LENGTH = 5;
+
 const CIPHER_TEST = 'KFFBBZFMWASPNVCFDUKDAGCEWPQDPNBSNE';
 
 let key = 'WHEATSON';
@@ -17,7 +19,7 @@ function createMatrix(key) {
   let line = 0;
   let keyArr = key.split('');
   keyArr.forEach((item, i) => {
-    if (i !== 0 && i % 5 === 0) {
+    if (i !== 0 && i % MAX_LENGTH === 0) {
       line++;
     }
 
@@ -30,7 +32,7 @@ function createMatrix(key) {
 
   ALPHABET.forEach((item) => {
     if (key.indexOf(item) === -1) {
-      if (matrix[line].length === 5) {
+      if (matrix[line].length === MAX_LENGTH) {
         line++;
       }
 
@@ -86,53 +88,41 @@ function transformArrayToMap(matrix) {
   return letterMap;
 }
 
+function getCoord(letterCoord) {
+  return (letterCoord + 1) < MAX_LENGTH
+    ? (letterCoord + 1)
+    : (letterCoord + 1 - MAX_LENGTH);
+}
+
 function cipherText(chunks, matrix, m) {
   let result = [];
   chunks.forEach((item) => {
-    // console.log('matrix', matrix);
-    // debugger
+    let firstLetterCoords = matrix[item[0]];
+    let secondLetterCoords = matrix[item[1]];
+
     if (matrix[item[0]][0] === matrix[item[1]][0]) {
       console.log('row');
 
-      let firstLetterCoords = matrix[item[0]];
-      let secondLetterCoords = matrix[item[1]];
+      let first = getCoord(firstLetterCoords[1]);
+      let second = getCoord(secondLetterCoords[1]);
 
-      let first = (firstLetterCoords[1] + 1) < 5
-        ? (firstLetterCoords[1] + 1)
-        : (firstLetterCoords[1] + 1 - 5);
-
-      let second = (secondLetterCoords[1] + 1) < 5
-        ? (secondLetterCoords[1] + 1)
-        : (secondLetterCoords[1] + 1 - 5);
-
-      result.push(m[firstLetterCoords[0]][first] + m[secondLetterCoords[0]][second]);
-      // let res =
+      result.push(
+        m[firstLetterCoords[0]][first] +
+        m[secondLetterCoords[0]][second]
+      );
     } else if (matrix[item[0]][1] === matrix[item[1]][1]) {
       console.log('column');
 
-      let firstLetterCoords = matrix[item[0]];
-      let secondLetterCoords = matrix[item[1]];
+      let first = getCoord(firstLetterCoords[0]);
+      let second = getCoord(secondLetterCoords[0])
 
-      let first = (firstLetterCoords[0] + 1) < 5
-        ? (firstLetterCoords[0] + 1)
-        : (firstLetterCoords[0] + 1 - 5);
-
-      let second = (secondLetterCoords[0] + 1) < 5
-        ? (secondLetterCoords[0] + 1)
-        : (secondLetterCoords[0] + 1 - 5);
-
-      result.push(m[first][firstLetterCoords[1]] + m[second][secondLetterCoords[1]]);
-
-      // result.push('  ');
+      result.push(
+        m[first][firstLetterCoords[1]] +
+        m[second][secondLetterCoords[1]]
+      );
     } else {
       console.log('other');
 
-      let firstLetterCoords = matrix[item[0]];
-      let secondLetterCoords = matrix[item[1]];
-
-// console.log('firstLetterCoords[0]', firstLetterCoords[0]);
-// console.log('secondLetterCoords[1]', secondLetterCoords[1]);
-// debugger
       result.push(
         m[firstLetterCoords[0]][secondLetterCoords[1]] +
         m[secondLetterCoords[0]][firstLetterCoords[1]]
@@ -143,10 +133,29 @@ function cipherText(chunks, matrix, m) {
   return result;
 }
 
+function renderMatrix(matrix) {
+  let matrixElement = document.getElementById('matrix');
+  let fragment = document.createDocumentFragment();
+
+  matrix.forEach((rows) => {
+    let rowDiv = document.createElement('div');
+    rowDiv.className = 'matrixRow';
+    rows.forEach((item) => {
+      let divItem = document.createElement('div');
+      divItem.textContent = item;
+      rowDiv.appendChild(divItem);
+    });
+    fragment.appendChild(rowDiv);
+  });
+
+  matrixElement.appendChild(fragment);
+}
+
 function init() {
   let trimmed = trimRepeatLetters(key);
   let matrix = createMatrix(trimmed);
   console.log('matrix', matrix);
+  renderMatrix(matrix);
   let chunks = splitToPhraseToChunks(phraseToCypher)
   // console.log('chunks', chunks);
 

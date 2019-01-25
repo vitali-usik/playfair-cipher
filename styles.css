@@ -1,0 +1,15 @@
+body {
+  margin: 0;
+  // background-color: black;
+}
+
+#matrix {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.matrixRow {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 auto;
+}
